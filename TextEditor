@@ -1,0 +1,177 @@
+"""
+
+Scientific Calculator
+
+author: Joe Stepp
+last modified: July 2013
+github.com/Paradox0
+
+"""
+
+__author__ = 'Joe'
+
+import tkinter, math, re
+from tkinter import ttk
+
+class Tree:
+    def __init__(self, data, left=None, right=None):
+        self.data = data
+        self.left  = left
+        self.right = right
+
+    def __str__(self):
+        return str(self.data)
+
+class Application(tkinter.Tk):
+
+    def __init__(self, parent):
+
+        tkinter.Tk.__init__(self, parent)
+        self.parent = parent
+        self.createwidgets()
+
+    def createwidgets(self):
+
+        self.grid()
+
+        self.buttonarray = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '=', 'CE', '+', '-', '*', '/', '%',
+        '.', '(', ')', '^']
+        self.ops = {'+': (lambda x,y: x+y), '-': (lambda x,y: x-y), '*': (lambda x,y: x*y), '/': (lambda x,y: x/y),
+                    '%': (lambda x,y: 100 * float(x)/float(y)), '^': (lambda x,y: x**y)}
+        self.oplist = self.ops.keys()
+        self.equalvar = tkinter.StringVar()
+        self.numbers = re.compile('\d')
+        self.same = re.compile('[\-.\d]')
+        self.ends = re.compile('[)]')
+        self.fops = re.compile('[\(.-]')
+        self.buffer = Tree
+        self.bcol = 0
+        self.brow = 1
+        self.index = 0
+        self.LastEval = False # We use this variable to determine if Eval was the last function called,
+        # so if we call Clear we know whether to clear the entire buffer or just pop the last item
+
+        style = ttk.Style()
+        style.configure("BW.TLabel", foreground = "blue", background = "white")
+
+        for b in self.buttonarray:  # Generate buttons & place them
+            button = ttk.Button(self, text = b,
+                command = lambda m = b: self.Buttons(m))
+            button.grid(column = self.bcol, row = self.brow, sticky = 'EW')
+            self.index += 1
+            self.brow += 1
+            if (self.index != 0) and (self.index % 5 == 0):
+                self.brow = 1
+                self.bcol += 1
+
+        self.equal = ttk.Label(self, textvariable = self.equalvar, style = "BW.TLabel")
+        self.equal.grid(column = 0, row = 0, columnspan = math.ceil(self.index/5),sticky='EW')
+        self.equalvar.set(u"0")
+
+        # Frame configuration
+
+        self.grid_columnconfigure(0, weight = 1)
+        self.resizable(False, False)
+        self.update()
+        self.geometry(self.geometry())
+
+    #logic
+
+    def Buttons(self, c):
+        try:
+            if c == 'CE':
+                self.Clear()
+                self.LastEval = False
+            elif c == '=':
+                self.Equals()
+                self.LastEval = True
+            elif self.same.match(c): # Numbers can always be added to the buffer
+                if self.buffer:
+                    if self.same.match(self.buffer[-1]):
+                        self.buffer[-1] = self.buffer[-1] + c
+                        self.equalvar.set(''.join(self.buffer))
+                        self.LastEval = False
+                    else:
+                        self.appendBuffer(c)
+                else:
+                    self.appendBuffer(c)
+            elif self.fops.match(c) and len(self.buffer) == 0:  # These operators can start the buffer
+                self.appendBuffer(c)
+            elif (self.buffer[-1] != '-') and c == '-': # A minus sign can follow anything but another minus sign
+                self.appendBuffer(c)
+            elif c == '(': # An open parentheses can start or follow anything
+                self.appendBuffer(c)
+            elif self.same.match(self.buffer[-1]):
+                self.appendBuffer(c)
+                # Operators get their own slot
+            elif self.buffer[-1] == ')': # Anything can follow a closed parentheses
+                if self.numbers.match(c) or  c == '(':
+                    self.appendBuffer('*')
+                    self.appendBuffer(c)
+                else:
+                    self.appendBuffer(c)
+        except IndexError:
+            self.LastEval = False
+
+    def Clear(self):
+        if not self.LastEval: # If the Eval wasn't the last function called, we only pop a single item
+            if self.buffer:
+                self.buffer.pop()
+                self.equalvar.set(''.join(self.buffer))
+        else:
+            self.buffer = []
+        if not self.buffer: # If the buffer is empty, we set the label to display a 0
+            self.equalvar.set(u"0")
+
+    def appendBuffer(self, c):
+            self.buffer.append(c)
+            self.equalvar.set(''.join(self.buffer))
+            self.LastEval = False
+
+    def Number(self, s):
+        try:
+            return int(s)
+        except ValueError:
+            return float(s)
+
+    def is_number(self, s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+
+    def Equals(self):
+        if len(self.buffer) < 3 or (not self.ends.match(self.buffer[-1]) and not self.is_number(self.buffer[-1])):
+            self.Error()
+        else:
+            self.buffer  = [str(self.Evaluate(self.buffer))]
+            self.equalvar.set(''.join(self.buffer))
+
+    def Evaluate(self, array):
+
+        p1 = 0
+        p2 = 0
+
+        if '(' in array:
+            pass
+        elif '^' in array:
+            pass
+        elif '*' in array:
+            pass
+        elif '/' in array:
+            pass
+        elif '+' in array:
+            pass
+        elif '-' in array:
+            pass
+
+
+    def Error(self):
+        self.equalvar.set('error: Invalid expression.')
+        self.after(2000, lambda: self.equalvar.set(''.join(self.buffer)))
+
+if __name__ == "__main__":
+    app = Application(None)
+    app.title('Python Scientific Calculator')
+    app.mainloop()
