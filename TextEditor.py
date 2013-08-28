@@ -4,7 +4,7 @@ Text Editor
 
 Note that text styles such as color, font, and text size are not preserved
 after re-opening a saved file because the file is saved in plain text format
-and the tags are properties of Tkinter.
+and the tags are properties of the Tkinter text widget.
 
 author: Joe Stepp
 last modified: August 2013
@@ -12,9 +12,9 @@ github.com/Paradox0
 
 """
 
+import os
 import tkinter
 import tkinter.colorchooser
-import os
 from tkinter import ttk, filedialog, TclError
 from tkinter.scrolledtext import ScrolledText
 from tkinter.font import Font, families
@@ -75,12 +75,11 @@ class Application(tkinter.Tk):
         self.menubar.add_cascade(label="File", menu=self.fileMenu, underline=0)
         self.menubar.add_cascade(label="Edit", menu=self.editMenu, underline=0)
 
-        # main text widgets
+        # main text widget
         self.text = ScrolledText(self, state='normal', height=30, wrap='word', font = self.font, pady=2, padx=3, undo=True)
         self.text.grid(column=0, row=0, sticky='NSEW')
 
         # Frame configuration
-
         self.grid_columnconfigure(0, weight=1)
         self.resizable(True, True)
 
