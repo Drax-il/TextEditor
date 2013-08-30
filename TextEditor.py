@@ -67,7 +67,7 @@ class Application(tkinter.Tk):
 
         """Accelerator bindings. The cut, copy, and paste functions are not
         bound to keyboard shortcuts because Windows already binds them, so if
-        Tkinter bound them as well whenver you typed ctrl+v the text would be
+        Tkinter bound them as well whenever you typed ctrl+v the text would be
         pasted twice."""
         self.bind_all("<Control-n>", self.new)
         self.bind_all("<Control-o>", self.open)
