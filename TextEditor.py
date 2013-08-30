@@ -20,75 +20,76 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter.font import Font, families
 
 class Application(tkinter.Tk):
-    """
-    main app
-    """
+    def __init__(self):
+        """Initialize widgets, methods."""
 
-    def __init__(self, parent):
-        """calls initialization methods"""
-
-        tkinter.Tk.__init__(self, parent)
-        self.parent = parent
-        self.createwidgets()
-
-    def createwidgets(self):
-        """sets ups widgets"""
-
+        tkinter.Tk.__init__(self)
         self.grid()
-        self.font = Font(family="Verdana", size=10)
 
-        # main menubar
-        self.menubar = tkinter.Menu(self.parent)
-        self.config(menu=self.menubar)
-        # list of fonts on the system
-        self.fontoptions = families(self.parent)
+        fontoptions = families(self)
+        font = Font(family="Verdana", size=10)
 
-        self.fileMenu = tkinter.Menu(self.menubar, tearoff=0)
-        self.editMenu = tkinter.Menu(self.menubar, tearoff=0)
-        self.fsubmenu = tkinter.Menu(self.editMenu, tearoff=0)
-        self.ssubmenu = tkinter.Menu(self.editMenu, tearoff=0)
+        menubar = tkinter.Menu(self)
+        fileMenu = tkinter.Menu(menubar, tearoff=0)
+        editMenu = tkinter.Menu(menubar, tearoff=0)
+        fsubmenu = tkinter.Menu(editMenu, tearoff=0)
+        ssubmenu = tkinter.Menu(editMenu, tearoff=0)
 
         # adds fonts to the font submenu and associates lambda functions
-        for option in self.fontoptions:
-            self.fsubmenu.add_command(label=option, command = lambda: self.font.configure(family=option))
-
+        for option in fontoptions:
+            fsubmenu.add_command(label=option, command = lambda: font.configure(family=option))
         # adds values to the size submenu and associates lambda functions
         for value in range(1,31):
-            self.ssubmenu.add_command(label=str(value), command = lambda: self.font.configure(size=value))
+            ssubmenu.add_command(label=str(value), command = lambda: font.configure(size=value))
 
-        # adding commands to the menus
-        self.fileMenu.add_command(label="New", command=self.new)
-        self.fileMenu.add_command(label="Open", command=self.open)
-        self.fileMenu.add_command(label="Save", command=self.save)
-        self.fileMenu.add_command(label="Exit", command=self.exit)
-        self.editMenu.add_command(label="Color", command=self.color)
-        self.editMenu.add_cascade(label="Font", underline=0, menu=self.fsubmenu)
-        self.editMenu.add_cascade(label="Size", underline=0, menu=self.ssubmenu)
-        self.editMenu.add_command(label="Bold", command=self.bold)
-        self.editMenu.add_command(label="Italic", command=self.italic)
-        self.editMenu.add_command(label="Underline", command=self.underline)
-        self.editMenu.add_command(label="Overstrike", command=self.overstrike)
-        self.editMenu.add_command(label="Undo", command=self.undo)
-        self.editMenu.add_command(label="Redo", command=self.redo)
+        # adds commands to the menus
+        menubar.add_cascade(label="File",underline=0, menu=fileMenu)
+        menubar.add_cascade(label="Edit",underline=0, menu=editMenu)
+        fileMenu.add_command(label="New", underline=1,
+                             command=self.new, accelerator="Ctrl+N")
+        fileMenu.add_command(label="Open", command=self.open, accelerator="Ctrl+O")
+        fileMenu.add_command(label="Save", command=self.save, accelerator="Ctrl+S")
+        fileMenu.add_command(label="Exit", underline=1,
+                             command=exit, accelerator="Ctrl+Q")
+        editMenu.add_command(label="Copy", command=self.copy, accelerator="Ctrl+C")
+        editMenu.add_command(label="Cut", command=self.cut, accelerator="Ctrl+X")
+        editMenu.add_command(label="Paste", command=self.paste, accelerator="Ctrl+V")
+        editMenu.add_cascade(label="Font", underline=0, menu=fsubmenu)
+        editMenu.add_cascade(label="Size", underline=0, menu=ssubmenu)
+        editMenu.add_command(label="Color", command=self.color)
+        editMenu.add_command(label="Bold", command=self.bold, accelerator="Ctrl+B")
+        editMenu.add_command(label="Italic", command=self.italic, accelerator="Ctrl+I")
+        editMenu.add_command(label="Underline", command=self.underline, accelerator="Ctrl+U")
+        editMenu.add_command(label="Overstrike", command=self.overstrike, accelerator="Ctrl+T")
+        editMenu.add_command(label="Undo", command=self.undo, accelerator="Ctrl+Z")
+        editMenu.add_command(label="Redo", command=self.redo, accelerator="Ctrl+Y")
+        self.config(menu=menubar)
 
-        # adds menus as cascades to the menubar
-        self.menubar.add_cascade(label="File", menu=self.fileMenu, underline=0)
-        self.menubar.add_cascade(label="Edit", menu=self.editMenu, underline=0)
+        """Accelerator bindings. The cut, copy, and paste functions are not bound to keyboard shortcuts because Windows already binds them, so if Tkinter bound them as well whenver you typed ctrl+v the text would be pasted twice."""
+        self.bind_all("<Control-n>", self.new)
+        self.bind_all("<Control-o>", self.open)
+        self.bind_all("<Control-s>", self.save)
+        self.bind_all("<Control-q>", self.exit)
+        self.bind_all("<Control-b>", self.bold)
+        self.bind_all("<Control-i>", self.italic)
+        self.bind_all("<Control-u>", self.underline)
+        self.bind_all("<Control-T>", self.overstrike)
+        self.bind_all("<Control-z>", self.undo)
+        self.bind_all("<Control-y>", self.redo)
 
-        # main text widget
-        self.text = ScrolledText(self, state='normal', height=30, wrap='word', font = self.font, pady=2, padx=3, undo=True)
+        self.text = ScrolledText(self, state='normal', height=30, wrap='word', font = font, pady=2, padx=3, undo=True)
         self.text.grid(column=0, row=0, sticky='NSEW')
 
         # Frame configuration
         self.grid_columnconfigure(0, weight=1)
         self.resizable(True, True)
 
-    #logic
+    """Command functions. *args is included because the keyboard bindings pass two arguments to the functions, while clicking in the menu passes only 1."""
 
-    def new(self):
-        """Creates a new window to replace the current one. Does not preserve  text in the old window!"""
-        app = Application(None)
-        app.title('Text Editor')
+    def new(self, *args):
+        """Creates a new window."""
+        app = Application()
+        app.title('Python Text Editor')
         app.option_add('*tearOff', False)
         app.mainloop()
 
@@ -101,7 +102,7 @@ class Application(tkinter.Tk):
         except TclError:
             pass
 
-    def bold(self):
+    def bold(self, *args):
         """Toggles bold for selected text."""
         try:
             current_tags = self.text.tag_names("sel.first")
@@ -115,7 +116,7 @@ class Application(tkinter.Tk):
         except TclError:
             pass
 
-    def italic(self):
+    def italic(self, *args):
         """Toggles italic for selected text."""
         try:
             current_tags = self.text.tag_names("sel.first")
@@ -129,7 +130,7 @@ class Application(tkinter.Tk):
         except TclError:
             pass
 
-    def underline(self):
+    def underline(self, *args):
         """Toggles underline for selected text."""
         try:
             current_tags = self.text.tag_names("sel.first")
@@ -143,7 +144,7 @@ class Application(tkinter.Tk):
         except TclError:
             pass
 
-    def overstrike(self):
+    def overstrike(self, *args):
         """Toggles overstrike for selected text."""
         try:
             current_tags = self.text.tag_names("sel.first")
@@ -157,21 +158,37 @@ class Application(tkinter.Tk):
         except TclError:
             pass
 
-    def undo(self):
+    def undo(self, *args):
         """Undo function"""
         try:
             self.text.edit_undo()
         except TclError:
             pass
 
-    def redo(self):
+    def redo(self, *args):
         """Redo function"""
         try:
             self.text.edit_redo()
         except TclError:
             pass
 
-    def open(self):
+    def copy(self, *args):
+        """Copy text"""
+        self.clipboard_clear()
+        self.clipboard_append(self.text.selection_get())
+
+    def cut(self, *args):
+        """Cut text"""
+        self.copy
+        self.text.delete("sel.first", "sel.last")
+
+    def paste(self, *args):
+        """Paste text"""
+        focus=self.focus_get()
+        insertion = self.selection_get(selection = "CLIPBOARD")
+        self.text.insert(0.0, insertion)
+
+    def open(self, *args):
         """Opens a file dialog to open a plain text file."""
         filename = tkinter.filedialog.askopenfilename()
 
@@ -181,20 +198,27 @@ class Application(tkinter.Tk):
         self.text.delete("1.0", "end")
         self.text.insert('insert', text)
 
-    def save(self):
-        """Opens a file dialog to save the text in plain text format."""
-        text = self.text.get("1.0", "end")
-        filename = tkinter.filedialog.asksaveasfilename()
+    def save(self, *args):
+        try:
+            """Opens a file dialog to save the text in plain text format."""
+            text = self.text.get("1.0", "end")
+            filename = tkinter.filedialog.asksaveasfilename()
 
-        with open(filename, 'w') as f:
-            f.write(text)
+            with open(filename, 'w') as f:
+                f.write(text)
+        except FileNotFoundError:
+            pass
 
-    def exit(self):
+    def exit(self, *args):
         """Exits the program."""
         self.quit()
 
 if __name__ == "__main__":
-    app = Application(None)
-    app.title('Text Editor')
+    app=Application()
+    app.title('Python Text Editor')
     app.option_add('*tearOff', False)
     app.mainloop()
+
+
+
+
