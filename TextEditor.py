@@ -1,6 +1,6 @@
 """
 
-Text Editor
+Python/Tkinter Text Editor
 
 Note that text styles such as color, font, and text size are not preserved
 after re-opening a saved file because the file is saved in plain text format
@@ -188,7 +188,6 @@ class Application(tkinter.Tk):
 
     def paste(self, *args):
         """Paste text"""
-        focus=self.focus_get()
         insertion = self.selection_get(selection = "CLIPBOARD")
         self.text.insert(0.0, insertion)
 
