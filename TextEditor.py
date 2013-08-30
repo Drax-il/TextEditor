@@ -65,7 +65,10 @@ class Application(tkinter.Tk):
         editMenu.add_command(label="Redo", command=self.redo, accelerator="Ctrl+Y")
         self.config(menu=menubar)
 
-        """Accelerator bindings. The cut, copy, and paste functions are not bound to keyboard shortcuts because Windows already binds them, so if Tkinter bound them as well whenver you typed ctrl+v the text would be pasted twice."""
+        """Accelerator bindings. The cut, copy, and paste functions are not
+        bound to keyboard shortcuts because Windows already binds them, so if
+        Tkinter bound them as well whenver you typed ctrl+v the text would be
+        pasted twice."""
         self.bind_all("<Control-n>", self.new)
         self.bind_all("<Control-o>", self.open)
         self.bind_all("<Control-s>", self.save)
@@ -84,7 +87,8 @@ class Application(tkinter.Tk):
         self.grid_columnconfigure(0, weight=1)
         self.resizable(True, True)
 
-    """Command functions. *args is included because the keyboard bindings pass two arguments to the functions, while clicking in the menu passes only 1."""
+    """Command functions. *args is included because the keyboard bindings pass
+    two arguments to the functions, while clicking in the menu passes only 1."""
 
     def new(self, *args):
         """Creates a new window."""
